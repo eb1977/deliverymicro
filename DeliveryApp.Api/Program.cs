@@ -1,8 +1,10 @@
 using AutoMapper;
+using Confluent.Kafka;
 using Ddd;
 using DeliveryApp.Api;
 using DeliveryApp.Api.Adapters.BackgroundJobs;
 using DeliveryApp.Api.Adapters.Http.Contract.src.OpenApi.Mapping;
+using DeliveryApp.Api.Adapters.Kafka.BasketConfirmed;
 using DeliveryApp.Core.Application.UseCases.Commands.CreateOrderCommand;
 using DeliveryApp.Core.Domain.Services.OrderAssignment;
 using DeliveryApp.Core.Ports;
@@ -129,6 +131,15 @@ builder.Services.AddSwaggerGen(options =>
     options.CustomSchemaIds(type => type.FullName);
 });
 
+// 10 модуль
+builder.Services.Configure<HostOptions>(options =>
+{
+    options.BackgroundServiceExceptionBehavior =
+        BackgroundServiceExceptionBehavior.Ignore;
+    options.ShutdownTimeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.AddHostedService<BasketConfirmedService>();
 
 var app = builder.Build();
 
