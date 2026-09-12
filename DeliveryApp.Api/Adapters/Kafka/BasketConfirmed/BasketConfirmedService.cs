@@ -61,7 +61,8 @@ public class BasketConfirmedService : BackgroundService
                     continue;
                 }
 
-                var command = new CreateOrderCommand(Guid.NewGuid(),
+                var orderid = Guid.Parse(evt.BasketId);
+                var command = new CreateOrderCommand(orderid,
                     evt.Address.Country, evt.Address.City, evt.Address.Street, evt.Address.House, evt.Address.Apartment, evt.Volume);
                 var result = await mediator.Send(command, cancellationToken);
                 if (!result.Ok)

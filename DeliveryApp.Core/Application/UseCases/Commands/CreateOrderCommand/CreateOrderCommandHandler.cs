@@ -1,6 +1,5 @@
 ﻿using Ddd;
 using DeliveryApp.Core.Domain.Model.OrderAggegate;
-using DeliveryApp.Core.Domain.Model.SharedKernel;
 using DeliveryApp.Core.Ports;
 using MediatR;
 
