@@ -1,6 +1,8 @@
 ﻿#nullable disable
 
 using Ddd;
+using DeliveryApp.Core.Application.EventHandlers.OrderAssigned;
+using DeliveryApp.Core.Application.EventHandlers.OrderCompleted;
 using DeliveryApp.Core.Domain.Model.SharedKernel;
 using System.Diagnostics.CodeAnalysis;
 
@@ -51,6 +53,7 @@ public class Order : Aggregate<Guid>
         }
 
         Status = OrderStatus.Assigned;
+        RaiseDomainEvent (new OrderAssignedDomainEvent(this));
     }
 
     /// <summary>
@@ -65,6 +68,7 @@ public class Order : Aggregate<Guid>
         }
 
         Status = OrderStatus.Completed;
+        RaiseDomainEvent(new OrderCompletedDomainEvent(this));
     }
 
     #endregion

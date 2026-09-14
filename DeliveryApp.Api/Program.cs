@@ -9,6 +9,7 @@ using DeliveryApp.Core.Application.UseCases.Commands.CreateOrderCommand;
 using DeliveryApp.Core.Domain.Services.OrderAssignment;
 using DeliveryApp.Core.Ports;
 using DeliveryApp.Infrastructure.Adapters.Gprc.GeoService;
+using DeliveryApp.Infrastructure.Adapters.Kafka;
 using DeliveryApp.Infrastructure.Adapters.PostgeSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -138,6 +139,11 @@ builder.Services.Configure<HostOptions>(options =>
         BackgroundServiceExceptionBehavior.Ignore;
     options.ShutdownTimeout = TimeSpan.FromSeconds(30);
 });
+
+// 11 модуль
+builder.Services.AddSingleton<IOrderAssignedEventsProducer, OrderAssignedEventsProducer>();
+builder.Services.AddSingleton<IOrderComplitedEventsProducer, OrderComplitedEventsProducer>();
+
 
 builder.Services.AddHostedService<BasketConfirmedService>();
 
