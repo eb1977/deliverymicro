@@ -4,10 +4,13 @@ namespace DeliveryApp.Core.Domain.Model.OrderAggegate.DomainEvents;
 
 public class OrderCompletedDomainEvent : DomainEvent
 {
-    public OrderCompletedDomainEvent(Order order)
+    public OrderCompletedDomainEvent(Guid id, OrderStatus status)
     {
-        Order = order;
+        Id = id;
+        Status = status;
     }
 
-    public Order Order { get; }
+    public Guid Id { get; }
+
+    public OrderStatus Status { get; }
 }

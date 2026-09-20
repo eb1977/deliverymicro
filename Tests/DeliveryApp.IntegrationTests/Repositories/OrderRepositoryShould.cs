@@ -1,7 +1,10 @@
-﻿using DeliveryApp.Core.Domain.Model.OrderAggegate;
+﻿using Ddd;
+using DeliveryApp.Core.Domain.Model.OrderAggegate;
 using DeliveryApp.Core.Domain.Model.SharedKernel;
 using DeliveryApp.Infrastructure.Adapters.PostgeSQL;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Xunit;
 
 namespace DeliveryApp.IntegrationTests.Repositories;
@@ -19,10 +22,15 @@ public class OrderRepositoryShould : IntegrationTestBase
             new Location(1, 2),
             new Volume(10)
         );
-        
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
         // Act
         await orderRepository.AddAsync(order);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
 
         // Assert
@@ -43,10 +51,15 @@ public class OrderRepositoryShould : IntegrationTestBase
             new Location(1, 2),
             new Volume(10)
         );
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
 
         // Act
         await orderRepository.AddAsync(order);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
 
         // Assert
@@ -64,10 +77,15 @@ public class OrderRepositoryShould : IntegrationTestBase
             new Location(1, 2),
             new Volume(10)
         );
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
 
         // Act
         await orderRepository.AddAsync(order);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
         order.Assign();
         await orderRepository.UpdateAsync(order);

@@ -1,14 +1,20 @@
-﻿using DeliveryApp.Core.Domain.Model.CourierAggregate;
+﻿using CSharpFunctionalExtensions;
+using Ddd;
+using DeliveryApp.Core.Domain.Model.CourierAggregate;
 using DeliveryApp.Core.Domain.Model.OrderAggegate;
 using DeliveryApp.Core.Domain.Model.SharedKernel;
 using DeliveryApp.Infrastructure.Adapters.PostgeSQL;
-using Xunit;
+using MediatR;
+using NSubstitute;
+using Xunit;                                        
 
 
 namespace DeliveryApp.IntegrationTests.Repositories;
 
 public  class CourierRepositoryShould : IntegrationTestBase
 {
+    
+
     [Fact]
     public async Task CanAddCourier()
     {
@@ -18,9 +24,15 @@ public  class CourierRepositoryShould : IntegrationTestBase
             "Иванов",
             new Location(1, 2)
         );
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
         // Act
         await courierRepository.AddAsync(courier);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
         // Assert
         var savedCourier = await courierRepository.GetByIdAsync(courier.Id, CancellationToken.None);
@@ -48,12 +60,18 @@ public  class CourierRepositoryShould : IntegrationTestBase
             new Volume(10)
         );
 
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+
         // Act
         await orderrepository.AddAsync(order);
         courier.AddAssignment(order);
         await courierRepository.AddAsync(courier);
 
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
 
         // Assert
@@ -83,11 +101,16 @@ public  class CourierRepositoryShould : IntegrationTestBase
         
 
         await courierRepository.AddAsync(courier);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
         // Act
         var orderrepository = new OrderRepository(DbContext);
-        orderrepository.AddAsync(order);
+        await orderrepository.AddAsync(order);
         courier.AddAssignment(order);
         await courierRepository.UpdateAsync(courier);
         await unitOfWork.SaveChangesAsync();
@@ -111,9 +134,14 @@ public  class CourierRepositoryShould : IntegrationTestBase
             "Петров",
             new Location(3, 4)
         );
+        var mediator = Substitute.For<IMediator>();
+        mediator.Publish(
+            Arg.Any<DomainEvent>(),
+            Arg.Any<CancellationToken>())
+            .Returns(Task.CompletedTask);
         await courierRepository.AddAsync(courier1);
         await courierRepository.AddAsync(courier2);
-        var unitOfWork = new UnitOfWork(DbContext);
+        var unitOfWork = new UnitOfWork(DbContext, mediator);
         await unitOfWork.SaveChangesAsync();
         // Act
         var couriers = await courierRepository.GetAllAsync(CancellationToken.None);

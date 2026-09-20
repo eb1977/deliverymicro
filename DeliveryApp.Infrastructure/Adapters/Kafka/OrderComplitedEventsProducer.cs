@@ -36,7 +36,7 @@ public class OrderComplitedEventsProducer : IOrderComplitedEventsProducer
         // Создаем Integration Event
         var integrationEvent = new OrderCompletedIntegrationEvent()
         { 
-            OrderId = notification.Order.Id.ToString()
+            OrderId = notification.Id.ToString()
         };
 
         // Отправляем Integration Event

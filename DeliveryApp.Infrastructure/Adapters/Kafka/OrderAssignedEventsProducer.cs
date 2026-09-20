@@ -35,7 +35,7 @@ public class OrderAssignedEventsProducer : IOrderAssignedEventsProducer
         // Создаем Integration Event
         var integrationEvent = new OrderAssignedIntegrationEvent()
         {
-            OrderId = notification.Order.Id.ToString()
+            OrderId = notification.Id.ToString()
         };
 
         // Отправляем Integration Event
