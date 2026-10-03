@@ -11,6 +11,7 @@ using DeliveryApp.Core.Ports;
 using DeliveryApp.Infrastructure.Adapters.Gprc.GeoService;
 using DeliveryApp.Infrastructure.Adapters.Kafka;
 using DeliveryApp.Infrastructure.Adapters.PostgeSQL;
+using DeliveryApp.Infrastructure.Adapters.PostgeSQL.BackgroundJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Newtonsoft.Json.Converters;
@@ -144,6 +145,25 @@ builder.Services.Configure<HostOptions>(options =>
 builder.Services.AddSingleton<IOrderAssignedEventsProducer, OrderAssignedEventsProducer>();
 builder.Services.AddSingleton<IOrderComplitedEventsProducer, OrderComplitedEventsProducer>();
 
+// 12 модуль
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+
+    q.AddJob<ProcessOutboxMessagesJob>(configure => { configure.WithIdentity(jobKey); });
+
+    q.AddTrigger(trigger =>
+    {
+        trigger
+            .ForJob(jobKey)
+            .WithSimpleSchedule(schedule =>
+                schedule
+                    .WithIntervalInSeconds(3)
+                    .RepeatForever()
+            );
+    });
+});
+
 
 builder.Services.AddHostedService<BasketConfirmedService>();
 
@@ -174,10 +194,10 @@ app.UseSwaggerUI(options =>
 app.MapControllers();
 
 // 6 модуль
-//using (var scope = app.Services.CreateScope())
-//{
-//    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//    db.Database.Migrate();
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

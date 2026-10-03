@@ -1,5 +1,7 @@
 ﻿using Ddd;
+using DeliveryApp.Infrastructure.Adapters.PostgeSQL.Entities;
 using MediatR;
+using Newtonsoft.Json;
 
 namespace DeliveryApp.Infrastructure.Adapters.PostgeSQL;
 
@@ -16,31 +18,40 @@ public class UnitOfWork : IUnitOfWork
 
     public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
+        await SaveDomainEventsToOutboxAsync(cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        await PublishDomainEventsAsync();
+        
         return true;
     }
+       
 
-    private async Task PublishDomainEventsAsync()
+    private async Task SaveDomainEventsToOutboxAsync(CancellationToken cancellationToken)
     {
-        // Получаем агрегаты, у которых есть доменные события
-        var domainEntities = _dbContext.ChangeTracker
+        // Собираем доменные события из всех агрегатов, отслеживаемых контекстом
+        var outboxMessages = _dbContext.ChangeTracker
             .Entries<IAggregateRoot>()
-            .Where(e => e.Entity.GetDomainEvents().Any())
+            .Select(e => e.Entity)
+            .SelectMany(aggregate =>
+            {
+                var domainEvents = aggregate.GetDomainEvents();
+                aggregate.ClearDomainEvents(); // очищаем после извлечения
+                return domainEvents;
+            })
+            .Select(domainEvent => new OutboxMessage
+            {
+                Id = domainEvent.EventId,
+                OccurredOnUtc = DateTime.UtcNow,
+                Type = domainEvent.GetType().Name,
+                Payload = JsonConvert.SerializeObject(
+                    domainEvent,
+                    new JsonSerializerSettings
+                    {
+                        TypeNameHandling = TypeNameHandling.All
+                    })
+            })
             .ToList();
 
-        // Извлекаем все события
-        var domainEvents = domainEntities
-            .SelectMany(e => e.Entity.GetDomainEvents())
-            .ToList();
-
-        // Очищаем их после извлечения
-        domainEntities.ForEach(e => e.Entity.ClearDomainEvents());
-
-        // Публикуем через MediatR
-        foreach (var domainEvent in domainEvents)
-        {
-            await _mediator.Publish(domainEvent);
-        }
+        if (outboxMessages.Count > 0)
+            await _dbContext.OutboxMessages.AddRangeAsync(outboxMessages, cancellationToken);
     }
 }

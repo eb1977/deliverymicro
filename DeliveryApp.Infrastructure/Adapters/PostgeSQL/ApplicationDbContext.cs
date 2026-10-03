@@ -1,5 +1,6 @@
 ﻿using DeliveryApp.Core.Domain.Model.CourierAggregate;
 using DeliveryApp.Core.Domain.Model.OrderAggegate;
+using DeliveryApp.Infrastructure.Adapters.PostgeSQL.Entities;
 using DeliveryApp.Infrastructure.Adapters.PostgeSQL.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +18,15 @@ public class ApplicationDbContext : DbContext
 
     public DbSet<Assignment> Assignments { get; set; }
 
+    public DbSet<OutboxMessage> OutboxMessages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Apply Configuration
         modelBuilder.ApplyConfiguration(new OrderEntityTypeConfiguration());
         modelBuilder.ApplyConfiguration(new CourierEntityConfiguration());
         modelBuilder.ApplyConfiguration(new AssignmentEntityConfiguration());
+        modelBuilder.ApplyConfiguration(new OutboxMessageEntityTypeConfiguration());
 
         //// Seed
         //modelBuilder.Entity<DeliveryPeriod>(b =>

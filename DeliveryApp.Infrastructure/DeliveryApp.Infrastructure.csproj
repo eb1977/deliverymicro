@@ -16,6 +16,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="JsonNet.ContractResolvers" Version="2.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
             <PrivateAssets>all</PrivateAssets>
@@ -27,6 +28,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+        <PackageReference Include="Quartz" Version="3.16.1" />
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.16.1" />
     </ItemGroup>
 
